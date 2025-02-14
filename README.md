@@ -6,6 +6,8 @@
 A plugin for PowerToys Run to generate short urls using Shlink.
 Access to a Shlink instance is required to use this plugin.
 
+![Screenshot](https://github.com/inukiwi/PowerToysRun-Shlink/blob/master/screenshot.png)
+
 ## Usage
 
 ```
