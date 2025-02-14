@@ -1,0 +1,14 @@
+{
+  "ID": "4692228510C14184AD80DFA2A156EA05",
+  "ActionKeyword": "shorten",
+  "IsGlobal": false,
+  "Name": "Shlink",
+  "Author": "inukiwi",
+  "Version": "1.0.0",
+  "Language": "csharp",
+  "Website": "https://github.com/inukiwi/PowerToysRun-Shlink",
+  "ExecuteFileName": "Community.PowerToys.Run.Plugin.Shlink.dll",
+  "IcoPathDark": "Images\\shlink.dark.png",
+  "IcoPathLight": "Images\\shlink.light.png",
+  "DynamicLoading": false
+}
