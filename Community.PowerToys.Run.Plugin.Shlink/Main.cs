@@ -124,8 +124,36 @@ namespace Community.PowerToys.Run.Plugin.Shlink {
             }
 
             // Load the Shlink instances from the settings.
-            var hosts = ShlinkHosts?.Split("\r") ?? [];
-            var keys = ShlinkKeys?.Split("\r") ?? [];
+            var hosts = ShlinkHosts != "" ? ShlinkHosts.Split("\r") : [];
+            var keys = ShlinkKeys != "" ? ShlinkKeys.Split("\r") : [];
+
+            // If no Shlink instances are configured, show an error message.
+            if (hosts.Length == 0)
+            {
+                return [
+                    new Result
+                    {
+                        QueryTextDisplay = query.Search,
+                        IcoPath = "Images/error.png",
+                        Title = "No Shlink instances configured",
+                        SubTitle = "Please configure the Shlink hosts and API keys in the settings",
+                    }
+                ];
+            }
+
+            // If the number of hosts and keys don't match, show an error message.
+            if (hosts.Length != keys.Length)
+            {
+                return [
+                    new Result
+                    {
+                        QueryTextDisplay = query.Search,
+                        IcoPath = "Images/error.png",
+                        Title = "Mismatched number of hosts and keys",
+                        SubTitle = "Please make sure the number of hosts and keys match",
+                    }
+                ];
+            }
 
             // Generate a result for each Shlink instance.
             var results = new List<Result>();

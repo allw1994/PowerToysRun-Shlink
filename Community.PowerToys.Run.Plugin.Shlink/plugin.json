@@ -4,7 +4,7 @@
   "IsGlobal": false,
   "Name": "Shlink",
   "Author": "inukiwi",
-  "Version": "1.0.0",
+  "Version": "1.1.0",
   "Language": "csharp",
   "Website": "https://github.com/inukiwi/PowerToysRun-Shlink",
   "ExecuteFileName": "Community.PowerToys.Run.Plugin.Shlink.dll",
