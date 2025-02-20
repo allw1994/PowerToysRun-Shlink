@@ -25,3 +25,5 @@ Follow these instructions to install the plugin:
 1. Download the latest release from the [releases page](https://github.com/inukiwi/PowerToysRun-Shlink/releases).
 2. Extract the zip file's contents to your PowerToys modules directory (usually `%LOCALAPPDATA%\Microsoft\PowerToys\PowerToys Run\Plugins`).
 3. Restart PowerToys to complete the installation process.
+4. Go to the PowerToys Run settings and enable Shlink
+5. In the settings configure your Shlink instance(s) (hostname and key)
