@@ -11,7 +11,7 @@ Access to a Shlink instance is required to use this plugin.
 ## Usage
 
 ```
-shorten [url] [optional: shortcode]
+shorten [url] [optional: shortcode] [optional: title]
 ```
 
 ### Use without prefix
