@@ -18,6 +18,10 @@ shorten [url] [optional: shortcode] [optional: title]
 
 You can change the `shorten` prefix from the settings page. To use this plugin without any prefix just check the "Include in global result" checkbox. With that option checked, you can use this plugin by just entering a url.
 
+### Automatically Add Tags
+
+If you want this plugin to automatically add tags to any generated links just add them on the settings page.
+
 ## Installation
 
 Follow these instructions to install the plugin:
