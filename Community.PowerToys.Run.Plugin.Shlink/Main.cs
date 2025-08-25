@@ -22,6 +22,7 @@ namespace Community.PowerToys.Run.Plugin.Shlink {
 
     public class ShlinkRequest
     {
+        public string[] tags { get; set; }
         public string longUrl { get; set; }
         public string customSlug { get; set; }
         public string title { get; set; }
@@ -55,10 +56,19 @@ namespace Community.PowerToys.Run.Plugin.Shlink {
                 PluginOptionType = PluginAdditionalOption.AdditionalOptionType.MultilineTextbox,
                 TextValue = ShlinkKeys,
             },
+            new()
+            {
+                Key = nameof(ShlinkTags),
+                DisplayLabel = "Shlink Tags",
+                DisplayDescription = "Tags that will be added to each url shortened (one on each line).",
+                PluginOptionType = PluginAdditionalOption.AdditionalOptionType.MultilineTextbox,
+                TextValue = ShlinkTags,
+            },
         ];
 
         private string ShlinkHosts { get; set; }
         private string ShlinkKeys { get; set; }
+        private string ShlinkTags { get; set; }
 
         private PluginInitContext Context { get; set; }
 
@@ -133,6 +143,7 @@ namespace Community.PowerToys.Run.Plugin.Shlink {
             // Load the Shlink instances from the settings.
             var hosts = ShlinkHosts != "" ? ShlinkHosts.Split("\r") : [];
             var keys = ShlinkKeys != "" ? ShlinkKeys.Split("\r") : [];
+            var tags = ShlinkTags != "" ? ShlinkTags.Split("\r") : [];
 
             // If no Shlink instances are configured, show an error message.
             if (hosts.Length == 0)
@@ -177,7 +188,7 @@ namespace Community.PowerToys.Run.Plugin.Shlink {
                     IcoPath = IconPath,
                     Title = "Create a short url with " + uri.Host,
                     SubTitle = subtitle,
-                    Action = _ => GenerateShortUrl(url, host, key, shortcode, title),
+                    Action = _ => GenerateShortUrl(url, host, key, tags, shortcode, title),
                 });
             }
 
@@ -204,6 +215,7 @@ namespace Community.PowerToys.Run.Plugin.Shlink {
 
             ShlinkHosts = settings.AdditionalOptions.FirstOrDefault(x => x.Key == nameof(ShlinkHosts))?.TextValue ?? "";
             ShlinkKeys = settings.AdditionalOptions.FirstOrDefault(x => x.Key == nameof(ShlinkKeys))?.TextValue ?? "";
+            ShlinkTags = settings.AdditionalOptions.FirstOrDefault(x => x.Key == nameof(ShlinkTags))?.TextValue ?? "";
         }
 
         public void Dispose()
@@ -231,7 +243,7 @@ namespace Community.PowerToys.Run.Plugin.Shlink {
 
         private void OnThemeChanged(Theme currentTheme, Theme newTheme) => UpdateIconPath(newTheme);
 
-        private static bool GenerateShortUrl(string value, string host, string key, string shortcode, string title)
+        private static bool GenerateShortUrl(string value, string host, string key, string[] tags, string shortcode, string title)
         {
             if (value != null)
             {
@@ -240,14 +252,14 @@ namespace Community.PowerToys.Run.Plugin.Shlink {
                 var request = new HttpRequestMessage(HttpMethod.Post, host + "/rest/v3/short-urls");
                 request.Headers.Add("X-Api-Key", key);
 
-                string jsonString = JsonSerializer.Serialize(new ShlinkRequest { longUrl = value });
+                string jsonString = JsonSerializer.Serialize(new ShlinkRequest { tags = tags, longUrl = value });
                 if (shortcode != null && title != null)
                 {
-                    jsonString = JsonSerializer.Serialize(new ShlinkRequest { longUrl = value, customSlug = shortcode, title = title });
+                    jsonString = JsonSerializer.Serialize(new ShlinkRequest { tags = tags, longUrl = value, customSlug = shortcode, title = title });
                 } 
                 else if (shortcode != null)
                 {
-                    jsonString = JsonSerializer.Serialize(new ShlinkRequest { longUrl = value, customSlug = shortcode });
+                    jsonString = JsonSerializer.Serialize(new ShlinkRequest { tags = tags, longUrl = value, customSlug = shortcode });
                 }
 
                 var content = new StringContent(jsonString, null, "application/json");
