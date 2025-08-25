@@ -11,6 +11,7 @@ using Wox.Plugin;
 using Wox.Plugin.Logger;
 using System.IO;
 using System.Text.RegularExpressions;
+using Windows.UI.ViewManagement;
 
 namespace Community.PowerToys.Run.Plugin.Shlink {
 
@@ -23,6 +24,7 @@ namespace Community.PowerToys.Run.Plugin.Shlink {
     {
         public string longUrl { get; set; }
         public string customSlug { get; set; }
+        public string title { get; set; }
     }
 
     /// <summary>
@@ -90,8 +92,8 @@ namespace Community.PowerToys.Run.Plugin.Shlink {
                     {
                         IcoPath = IconPath,
                         Title = "Create a short url",
-                        QueryTextDisplay = "url [optional shortcode]",
-                        SubTitle = "Enter a url (and optionally shortcode) to shorten",
+                        QueryTextDisplay = "url [optional shortcode] [optional title]",
+                        SubTitle = "Enter a url (and optionally shortcode or title) to shorten",
                     }
                 ];
             }
@@ -115,10 +117,15 @@ namespace Community.PowerToys.Run.Plugin.Shlink {
                 url = terms[0];
             }
 
-            // If the user has provided a shortcode, use it.
-            var shortcode = terms.Count == 2 ? terms[1] : null;
+            // If the user has provided a shortcode or title, use it.
+            var shortcode = terms.Count >= 2 ? terms[1] : null;
+            var title = terms.Count == 3 ? terms[2] : null;
             var subtitle = "With a randomly generated shortcode";
-            if (shortcode != null)
+            if ((shortcode != null) && (title != null))
+            {
+                subtitle = "With shortcode: " + shortcode + " and title: " + title;
+            } 
+            else if (shortcode != null)
             {
                 subtitle = "With shortcode: " + shortcode;
             }
@@ -170,7 +177,7 @@ namespace Community.PowerToys.Run.Plugin.Shlink {
                     IcoPath = IconPath,
                     Title = "Create a short url with " + uri.Host,
                     SubTitle = subtitle,
-                    Action = _ => GenerateShortUrl(url, host, key, shortcode),
+                    Action = _ => GenerateShortUrl(url, host, key, shortcode, title),
                 });
             }
 
@@ -224,7 +231,7 @@ namespace Community.PowerToys.Run.Plugin.Shlink {
 
         private void OnThemeChanged(Theme currentTheme, Theme newTheme) => UpdateIconPath(newTheme);
 
-        private static bool GenerateShortUrl(string value, string host, string key, string shortcode)
+        private static bool GenerateShortUrl(string value, string host, string key, string shortcode, string title)
         {
             if (value != null)
             {
@@ -234,7 +241,11 @@ namespace Community.PowerToys.Run.Plugin.Shlink {
                 request.Headers.Add("X-Api-Key", key);
 
                 string jsonString = JsonSerializer.Serialize(new ShlinkRequest { longUrl = value });
-                if (shortcode != null)
+                if (shortcode != null && title != null)
+                {
+                    jsonString = JsonSerializer.Serialize(new ShlinkRequest { longUrl = value, customSlug = shortcode, title = title });
+                } 
+                else if (shortcode != null)
                 {
                     jsonString = JsonSerializer.Serialize(new ShlinkRequest { longUrl = value, customSlug = shortcode });
                 }
