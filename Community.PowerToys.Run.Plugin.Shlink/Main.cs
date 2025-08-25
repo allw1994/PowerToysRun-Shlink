@@ -64,11 +64,20 @@ namespace Community.PowerToys.Run.Plugin.Shlink {
                 PluginOptionType = PluginAdditionalOption.AdditionalOptionType.MultilineTextbox,
                 TextValue = ShlinkTags,
             },
+            new()
+            {
+                Key = nameof(ShlinkTitleFirst),
+                DisplayLabel = "Title First in Command",
+                DisplayDescription = "If ticked the title field should be entered before the shortcode.",
+                PluginOptionType = PluginAdditionalOption.AdditionalOptionType.Checkbox,
+                Value = ShlinkTitleFirst,
+            },
         ];
 
         private string ShlinkHosts { get; set; }
         private string ShlinkKeys { get; set; }
         private string ShlinkTags { get; set; }
+        private bool ShlinkTitleFirst { get; set; }
 
         private PluginInitContext Context { get; set; }
 
@@ -102,7 +111,7 @@ namespace Community.PowerToys.Run.Plugin.Shlink {
                     {
                         IcoPath = IconPath,
                         Title = "Create a short url",
-                        QueryTextDisplay = "url [optional shortcode] [optional title]",
+                        QueryTextDisplay = ShlinkTitleFirst == true ? "url [optional title] [optional shortcode]" : "url [optional shortcode] [optional title]",
                         SubTitle = "Enter a url (and optionally shortcode or title) to shorten",
                     }
                 ];
@@ -127,17 +136,38 @@ namespace Community.PowerToys.Run.Plugin.Shlink {
                 url = terms[0];
             }
 
-            // If the user has provided a shortcode or title, use it.
-            var shortcode = terms.Count >= 2 ? terms[1] : null;
-            var title = terms.Count == 3 ? terms[2] : null;
-            var subtitle = "With a randomly generated shortcode";
-            if ((shortcode != null) && (title != null))
+            // Decide which comes first based on ShlinkTitleFirst
+            var first = terms.Count >= 2 ? terms[1] : null;
+            var second = terms.Count == 3 ? terms[2] : null;
+
+            string title, shortcode;
+
+            if (ShlinkTitleFirst)
             {
-                subtitle = "With shortcode: " + shortcode + " and title: " + title;
-            } 
+                title = first;
+                shortcode = second;
+            }
+            else
+            {
+                shortcode = first;
+                title = second;
+            }
+
+            var subtitle = "With a randomly generated shortcode";
+
+            if (title != null && shortcode != null)
+            {
+                subtitle = ShlinkTitleFirst
+                    ? $"With title: {title} and shortcode: {shortcode}"
+                    : $"With shortcode: {shortcode} and title: {title}";
+            }
+            else if (title != null)
+            {
+                subtitle = $"With title: {title}";
+            }
             else if (shortcode != null)
             {
-                subtitle = "With shortcode: " + shortcode;
+                subtitle = $"With shortcode: {shortcode}";
             }
 
             // Load the Shlink instances from the settings.
@@ -216,6 +246,7 @@ namespace Community.PowerToys.Run.Plugin.Shlink {
             ShlinkHosts = settings.AdditionalOptions.FirstOrDefault(x => x.Key == nameof(ShlinkHosts))?.TextValue ?? "";
             ShlinkKeys = settings.AdditionalOptions.FirstOrDefault(x => x.Key == nameof(ShlinkKeys))?.TextValue ?? "";
             ShlinkTags = settings.AdditionalOptions.FirstOrDefault(x => x.Key == nameof(ShlinkTags))?.TextValue ?? "";
+            ShlinkTitleFirst = settings.AdditionalOptions.FirstOrDefault(x => x.Key == nameof(ShlinkTitleFirst))?.Value ?? false;
         }
 
         public void Dispose()
@@ -260,6 +291,10 @@ namespace Community.PowerToys.Run.Plugin.Shlink {
                 else if (shortcode != null)
                 {
                     jsonString = JsonSerializer.Serialize(new ShlinkRequest { tags = tags, longUrl = value, customSlug = shortcode });
+                }
+                else if (title != null)
+                {
+                    jsonString = JsonSerializer.Serialize(new ShlinkRequest { tags = tags, longUrl = value, title = title });
                 }
 
                 var content = new StringContent(jsonString, null, "application/json");
